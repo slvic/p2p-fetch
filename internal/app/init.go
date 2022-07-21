@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"github.com/slvic/p2p-fetch/internal/configs"
 )
@@ -19,6 +20,13 @@ func Initialize(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("could not get config: %s", err.Error())
 	}
 
+	flag.StringVar(
+		&config.Binance.Address,
+		"a",
+		config.Binance.Address,
+		"binance api full address")
+
+	flag.Parse()
 	return &App{}, nil
 }
 

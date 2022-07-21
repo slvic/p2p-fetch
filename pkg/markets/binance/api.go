@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/slvic/p2p-fetch/pkg/config"
+	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
 	"io/ioutil"
 	"net/http"
 )
 
 type Binance struct {
-	config config.Binance
+	config configs.Binance
 }
 
 func (b *Binance) GetData(options *models.BinanceRequest) error {
