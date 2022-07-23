@@ -6,11 +6,16 @@ import (
 )
 
 type AppConfig struct {
-	Binance Binance `hcl:"binance"`
+	Binance    Binance    `hcl:"binance"`
+	Bestchange Bestchange `hcl:"bestchange"`
 }
 
 type Binance struct {
 	Address string `hcl:"address"`
+}
+
+type Bestchange struct {
+	BaseUrl string `hcl:"baseurl"`
 }
 
 func GetConfig(fileName string) (AppConfig, error) {

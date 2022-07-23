@@ -2,7 +2,10 @@ module github.com/slvic/p2p-fetch
 
 go 1.18
 
-require github.com/hashicorp/hcl/v2 v2.13.0
+require (
+	github.com/hashicorp/hcl/v2 v2.13.0
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
+)
 
 require (
 	github.com/agext/levenshtein v1.2.1 // indirect

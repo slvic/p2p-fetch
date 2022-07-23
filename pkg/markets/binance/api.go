@@ -42,7 +42,7 @@ func (b Binance) sendRequest(options *models.BinanceRequest) ([]byte, error) {
 		return nil, fmt.Errorf("could not send a request: %s", err.Error())
 	}
 
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not read a responce body: %s", err.Error())
 	}
@@ -50,8 +50,8 @@ func (b Binance) sendRequest(options *models.BinanceRequest) ([]byte, error) {
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unsuccessfull request, status code %d, response body: %s",
 			response.StatusCode,
-			string(responseBytes))
+			string(responseBodyBytes))
 	}
 
-	return responseBytes, nil
+	return responseBodyBytes, nil
 }
