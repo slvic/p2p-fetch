@@ -5,26 +5,15 @@ import (
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/bestchange/models"
 	"golang.org/x/net/html"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 const (
-	startTag             = `StartTag`
-	endTag               = `EndTag`
-	tableBodyTag         = `tbody`
-	contentTableId       = `content_table`
-	endpointTemplate     = `%s-to-%s.html`
-	exchangerAttribute   = `bj`
-	giveAttribute        = `fs`
-	giveCountryAttribute = `ct`
-	giveMinimumAttribute = `fm1`
-	giveMaximumAttribute = `fm2`
-	getAttribute         = `bi`
-	reserveAttribute     = `ar arp`
+	endpointTemplate  = `%s-to-%s.html`
+	contentTableClass = `content_table`
+	tableBodyTag      = `tbody`
 )
 
 type Bestchange struct {
@@ -40,80 +29,26 @@ func (b Bestchange) GetData(give, get string) error {
 		return fmt.Errorf("could not send request: %s", err.Error())
 	}
 
-	parseBestchangeTable(string(responceBytes))
-}
-
-func parseBestchangeTable(page string) ([]models.BestchangeRow, error) {
-	var bestchangeTable []models.BestchangeRow
-	contentTableOrrured := false
-	var contentTableCounter int
-	reader := strings.NewReader(page)
-	tokenizer := html.NewTokenizer(reader)
-	html.Parse(reader)
-	for {
-		tt := tokenizer.Next()
-		if tt == html.ErrorToken {
-			if tokenizer.Err() == io.EOF {
-				return bestchangeTable, nil
-			}
-			return nil, fmt.Errorf("error token found: %s", tokenizer.Err().Error())
-		}
-		_, hasAttr := tokenizer.TagName()
-
-		attrKeyBytes, attrValueBytes, moreAttr := tokenizer.TagAttr()
-		attrKey := string(attrKeyBytes)
-		attrValue := string(attrValueBytes)
-
-		if !contentTableOrrured {
-			if attrKey == contentTableId {
-				contentTableOrrured = true
-			}
-			continue
-		}
-
-		if attrKey == tableBodyTag {
-			switch tt.String() {
-			case startTag:
-				contentTableCounter += 1
-			case endTag:
-				contentTableCounter -= 1
-			}
-		}
-
-		if contentTableCounter == 0 {
-			break
-		}
-
-		if hasAttr {
-			var bestchangeRow models.BestchangeRow
-			for {
-				switch attrKey {
-				case exchangerAttribute:
-					bestchangeRow.Exchanger = attrValue
-				case giveAttribute:
-					bestchangeRow.Give = attrValue
-				case giveCountryAttribute:
-					bestchangeRow.GiveCountry = attrValue
-				case giveMinimumAttribute:
-					bestchangeRow.GiveMin = attrValue
-				case giveMaximumAttribute:
-					bestchangeRow.GiveMax = attrValue
-				case getAttribute:
-					if _, err := strconv.ParseFloat(attrValue, 64); err != nil {
-						bestchangeRow.Give = attrValue
-					}
-				case reserveAttribute:
-					bestchangeRow.Reserve = attrValue
-					bestchangeTable = append(bestchangeTable, bestchangeRow)
-				}
-
-				if !moreAttr {
-					break
-				}
-			}
-		}
+	document, err := html.Parse(strings.NewReader(string(responceBytes)))
+	if err != nil {
+		return fmt.Errorf("could not parse html document: %w", err)
 	}
-	return bestchangeTable, nil
+	contentTableNode, err := GetNodeByAttrKey(document, "id", contentTableClass)
+	if err != nil {
+		return fmt.Errorf("could not get node by attribute key: %w", err)
+	}
+	contentTableBodyNode, err := GetNodeByTag(contentTableNode, tableBodyTag)
+	if err != nil {
+		return fmt.Errorf("could not get node by tag: %w", err)
+	}
+	tableRowNodes, err := GetTableRowNodes(contentTableBodyNode)
+	if err != nil {
+		return fmt.Errorf("could not get table row nodes: %w", err)
+	}
+
+	for _, tableRowNode := range tableRowNodes {
+		//GetNodeByAttrKey(exchangerAttribute)
+	}
 }
 
 func (b Bestchange) sendRequest(give, get string) ([]byte, error) {
