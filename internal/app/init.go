@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"github.com/slvic/p2p-fetch/internal/configs"
+	"github.com/slvic/p2p-fetch/pkg/bestchange"
+	"github.com/slvic/p2p-fetch/pkg/markets/binance"
+	"log"
 )
 
 const (
@@ -12,6 +14,9 @@ const (
 )
 
 type App struct {
+	bestChange *bestchange.Bestchange
+	binance    *binance.Binance
+	config     configs.App
 }
 
 func Initialize(ctx context.Context) (*App, error) {
@@ -20,16 +25,31 @@ func Initialize(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("could not get config: %s", err.Error())
 	}
 
-	flag.StringVar(
-		&config.Binance.Address,
-		"a",
-		config.Binance.Address,
-		"binance api full address")
+	bestchangeParser := bestchange.New(config.Bestchange)
+	binanceApi := binance.New(config.Binance)
 
-	flag.Parse()
-	return &App{}, nil
+	return &App{
+		bestChange: bestchangeParser,
+		binance:    binanceApi,
+		config:     config.App,
+	}, nil
 }
 
 func (a *App) Run(ctx context.Context) error {
-	return nil
+	go func() {
+		assets, err := a.bestChange.GetAssets()
+		if err != nil {
+			log.Printf("could not get assets: %s", err.Error())
+			return
+		}
+		err = a.bestChange.GetExchangers(assets)
+		if err != nil {
+			log.Printf("could not get exchangers: %s", err.Error())
+			return
+		}
+	}()
+
+	go func() {
+		a.binance.GetData()
+	}()
 }

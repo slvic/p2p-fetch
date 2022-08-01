@@ -6,56 +6,145 @@ import (
 	"github.com/slvic/p2p-fetch/pkg/bestchange/models"
 	"golang.org/x/net/html"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
 
 const (
 	endpointTemplate  = `%s-to-%s.html`
-	contentTableClass = `content_table`
+	exchangersTableId = `content_table`
+	assetsTableId     = `curr_tab_c`
+	assetsLinkClass   = `lc`
 	tableBodyTag      = `tbody`
 )
 
 type Bestchange struct {
 	config configs.Bestchange
-	body   string
 }
 
-func (b Bestchange) GetData(give, get string) error {
-	var bestchangeTable models.BestchangeRow
-
-	responceBytes, err := b.sendRequest(give, get)
-	if err != nil {
-		return fmt.Errorf("could not send request: %s", err.Error())
-	}
-
-	document, err := html.Parse(strings.NewReader(string(responceBytes)))
-	if err != nil {
-		return fmt.Errorf("could not parse html document: %w", err)
-	}
-	contentTableNode, err := GetNodeByAttrKey(document, "id", contentTableClass)
-	if err != nil {
-		return fmt.Errorf("could not get node by attribute key: %w", err)
-	}
-	contentTableBodyNode, err := GetNodeByTag(contentTableNode, tableBodyTag)
-	if err != nil {
-		return fmt.Errorf("could not get node by tag: %w", err)
-	}
-	tableRowNodes, err := GetTableRowNodes(contentTableBodyNode)
-	if err != nil {
-		return fmt.Errorf("could not get table row nodes: %w", err)
-	}
-
-	for _, tableRowNode := range tableRowNodes {
-		//GetNodeByAttrKey(exchangerAttribute)
-	}
+func New(cfg configs.Bestchange) *Bestchange {
+	return &Bestchange{config: cfg}
 }
 
-func (b Bestchange) sendRequest(give, get string) ([]byte, error) {
-	url := fmt.Sprintf(b.config.BaseUrl+endpointTemplate, give, get)
+func (b Bestchange) GetAssets() ([]models.ExchangePair, error) {
+	var exchangePairs []models.ExchangePair
+
+	rawPage, err := b.getRawPage()
+	if err != nil {
+		return nil, fmt.Errorf("could not get raw page: %s", err.Error())
+	}
+
+	assetsTableNode, err := GetNodeByAttrKey(rawPage, "id", assetsTableId)
+	if err != nil {
+		return nil, fmt.Errorf("could not get assets table node by attribute key: %w", err)
+	}
+	assetsTableBodyNode, err := GetNodeByTag(assetsTableNode, tableBodyTag)
+	if err != nil {
+		return nil, fmt.Errorf("could not get assets table body node by tag: %w", err)
+	}
+
+	assetsTableRowNodes, err := GetTableRowNodes(assetsTableBodyNode)
+	if err != nil {
+		return nil, fmt.Errorf("could not get assets table row nodes: %w", err)
+	}
+
+	for _, tableNodeRow := range assetsTableRowNodes {
+		linkElement, err := GetNodeByAttrKey(tableNodeRow, "class", assetsLinkClass)
+		if err != nil {
+			return nil, fmt.Errorf("could not get assent's link: %w", err)
+		}
+		exchangePair, err := ParseBestchangeAssetsRow(RenderNode(linkElement))
+		if err != nil {
+			log.Printf("could not parse bestchange assets row %s \n\r error: %s", RenderNode(linkElement), err.Error())
+			continue
+		}
+		exchangePairs = append(exchangePairs, exchangePair)
+	}
+
+	return exchangePairs, nil
+}
+
+func (b Bestchange) GetExchangers(exchanges []models.ExchangePair) error {
+	for _, exchange := range exchanges {
+		err := b.getExchangersByPair(exchange)
+		if err != nil {
+			log.Printf(
+				"could not get exchange by pair give: %s, get: %s \n\n Error: %s",
+				exchange.Give,
+				exchange.Get,
+				err.Error(),
+			)
+			continue
+		}
+	}
+
+	return nil
+}
+
+func (b Bestchange) getExchangersByPair(exchange models.ExchangePair) error {
+	var bestchangeTable []models.BestchangeRow
+
+	rawExchangers, err := b.getRawExchangers(exchange)
+	if err != nil {
+		return fmt.Errorf("could not raw exchangers: %s", err.Error())
+	}
+
+	exchangersTableNode, err := GetNodeByAttrKey(rawExchangers, "id", exchangersTableId)
+	if err != nil {
+		return fmt.Errorf("could not get exchangers table node by attribute key: %w", err)
+	}
+	exchangersTableBodyNode, err := GetNodeByTag(exchangersTableNode, tableBodyTag)
+	if err != nil {
+		return fmt.Errorf("could not get exchangers table body node by tag: %w", err)
+	}
+	exchangersTableRowNodes, err := GetTableRowNodes(exchangersTableBodyNode)
+	if err != nil {
+		return fmt.Errorf("could not get exchangers table row nodes: %w", err)
+	}
+
+	for _, tableRowNode := range exchangersTableRowNodes {
+		row, err := ParseBestchangeExchangerRow(RenderNode(tableRowNode))
+		if err != nil {
+			log.Printf("could not parse bestchange exchanger row %s \n\r error: %s", RenderNode(tableRowNode), err.Error())
+			continue
+		}
+		bestchangeTable = append(bestchangeTable, row)
+	}
+	return nil
+}
+
+func (b Bestchange) getRawExchangers(exchange models.ExchangePair) (*html.Node, error) {
+	url := fmt.Sprintf(b.config.BaseUrl+endpointTemplate, exchange.Give, exchange.Get)
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("could not get responce: %s", err.Error())
+	}
+
+	responseBodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("could not read responce body: %s", err.Error())
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(
+			"unsuccessfull request, status code %d, response body: %s",
+			response.StatusCode,
+			string(responseBodyBytes))
+	}
+
+	document, err := html.Parse(strings.NewReader(string(responseBodyBytes)))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse raw exchangers: %w", err)
+	}
+
+	return document, nil
+}
+
+func (b Bestchange) getRawPage() (*html.Node, error) {
+	response, err := http.Get(b.config.BaseUrl)
+	if err != nil {
+		return nil, fmt.Errorf("could not get responce: %s", err)
 	}
 
 	responseBodyBytes, err := ioutil.ReadAll(response.Body)
@@ -69,5 +158,10 @@ func (b Bestchange) sendRequest(give, get string) ([]byte, error) {
 			string(responseBodyBytes))
 	}
 
-	return responseBodyBytes, nil
+	document, err := html.Parse(strings.NewReader(string(responseBodyBytes)))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse raw page: %w", err)
+	}
+
+	return document, nil
 }

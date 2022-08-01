@@ -14,6 +14,14 @@ type Binance struct {
 	config configs.Binance
 }
 
+func New(cfg configs.Binance) *Binance {
+	return &Binance{config: cfg}
+}
+
+func (b Binance) GetOptions() {
+
+}
+
 func (b *Binance) GetData(options *models.BinanceRequest) error {
 	var binanceResponse models.BinanceResponse
 

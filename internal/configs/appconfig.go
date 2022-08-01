@@ -3,11 +3,17 @@ package configs
 import (
 	"fmt"
 	"github.com/hashicorp/hcl/v2/hclsimple"
+	"time"
 )
 
 type AppConfig struct {
+	App        App        `hcl:"app"`
 	Binance    Binance    `hcl:"binance"`
 	Bestchange Bestchange `hcl:"bestchange"`
+}
+
+type App struct {
+	FetchInterval time.Duration `hcl:"fetchInterval"`
 }
 
 type Binance struct {

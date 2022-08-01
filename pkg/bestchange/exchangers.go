@@ -19,11 +19,10 @@ const (
 	reserveAttribute     = `arp`
 )
 
-func ParseBestchangeRow(page string) (models.BestchangeRow, error) {
+func ParseBestchangeExchangerRow(page string) (models.BestchangeRow, error) {
 	var bestchangeRow models.BestchangeRow
 	reader := strings.NewReader(page)
 	tokenizer := html.NewTokenizer(reader)
-	html.Parse(reader)
 	for {
 		tt := tokenizer.Next()
 		if tt == html.ErrorToken {
@@ -65,5 +64,4 @@ func ParseBestchangeRow(page string) (models.BestchangeRow, error) {
 			}
 		}
 	}
-	return bestchangeRow, nil
 }

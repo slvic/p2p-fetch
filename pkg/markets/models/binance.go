@@ -23,6 +23,9 @@ type Data struct {
 	Advertiser Advertiser `json:"advertiser"`
 }
 
+type name struct {
+}
+
 type Adv struct {
 	AdvNo                           *string        `json:"advNo"`
 	Classify                        *string        `json:"classify"`

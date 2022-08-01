@@ -10,3 +10,8 @@ type BestchangeRow struct {
 	Reserve     string
 	//Reviews    string
 }
+
+type ExchangePair struct {
+	Give string
+	Get  string
+}
