@@ -1,33 +1,34 @@
-//package main
-//
-//import (
-//	"context"
-//	"fmt"
-//	"github.com/slvic/p2p-fetch/internal/app"
-//	"os"
-//	"os/signal"
-//	"syscall"
-//)
-//
-//func run(ctx context.Context) error {
-//	newApp, err := app.Initialize(ctx)
-//	if err != nil {
-//		return err
-//	}
-//	err = newApp.Run(ctx)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func main() {
-//	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT)
-//	defer cancel()
-//	if err := run(ctx); err != nil {
-//		_, _ = fmt.Fprintf(os.Stderr, "app run: %s\n", err.Error())
-//	}
-//}
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/slvic/p2p-fetch/internal/app"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
+func run(ctx context.Context) error {
+	newApp, err := app.Initialize(ctx)
+	if err != nil {
+		return err
+	}
+	err = newApp.Run(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT)
+	defer cancel()
+	if err := run(ctx); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "app run: %s\n", err.Error())
+	}
+}
+
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -224,27 +225,3 @@
 //
 //</body>
 //</html>`
-
-package main
-
-import "strings"
-
-const (
-	assetSeparator = `to`
-	giveBorder     = `.com/`
-	getBorder      = `.html`
-)
-
-func main() {
-	str := `https://www.bestchange.com/bitcoin-trc-to-cash-ruble-tinkoff.html`
-	assetSeparatorIndex := strings.Index(str, assetSeparator)
-	giveBorderIndex := strings.Index(str, giveBorder)
-	getBorderIndex := strings.Index(str, getBorder)
-
-	give := str[giveBorderIndex+len(giveBorder) : assetSeparatorIndex-1]
-	get := str[assetSeparatorIndex+len(assetSeparator)+1 : getBorderIndex]
-
-	if give == "" && get == "" {
-
-	}
-}

@@ -7,6 +7,7 @@ import (
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -18,11 +19,32 @@ func New(cfg configs.Binance) *Binance {
 	return &Binance{config: cfg}
 }
 
-func (b Binance) GetOptions() {
-
+func getOptions(asset, fiat string) models.BinanceRequest {
+	return models.BinanceRequest{
+		Asset:         asset,
+		Fiat:          fiat,
+		MerchantCheck: true,
+		Page:          1,
+		PayTypes:      []string{"BANK"},
+		PublisherType: nil,
+		Rows:          20,
+		TradeType:     "SELL",
+	}
 }
 
-func (b *Binance) GetData(options *models.BinanceRequest) error {
+func (b *Binance) GetAllData() {
+	for _, asset := range b.config.Assets {
+		for _, fiat := range b.config.Fiats {
+			options := getOptions(asset, fiat)
+			err := b.getData(&options)
+			if err != nil {
+				log.Printf("could not get binance data: %s", err.Error())
+			}
+		}
+	}
+}
+
+func (b *Binance) getData(options *models.BinanceRequest) error {
 	var binanceResponse models.BinanceResponse
 
 	response, err := b.sendRequest(options)

@@ -3,7 +3,7 @@ package models
 type BinanceRequest struct {
 	Asset         string   `json:"asset"`
 	Fiat          string   `json:"fiat"`
-	MerchantCheck string   `json:"merchantCheck"`
+	MerchantCheck bool     `json:"merchantCheck"`
 	Page          int32    `json:"page"`
 	PayTypes      []string `json:"payTypes"`
 	PublisherType *string  `json:"publisherType"`
@@ -12,7 +12,7 @@ type BinanceRequest struct {
 }
 
 type BinanceResponse struct {
-	Code          *int32  `json:"code"`
+	Code          *string `json:"code"`
 	Message       *string `json:"message"`
 	MessageDetail *string `json:"messageDetail"`
 	Data          []Data  `json:"data"`
@@ -108,8 +108,8 @@ type Advertiser struct {
 	Margin           *string       `json:"margin"`
 	MarginUnit       *string       `json:"marginUnit"`
 	OrderCount       *string       `json:"orderCount"`
-	MonthOrderCount  *string       `json:"monthOrderCount"`
-	MonthFinishRate  *string       `json:"monthFinishRate"`
+	MonthOrderCount  *int          `json:"monthOrderCount"`
+	MonthFinishRate  *float32      `json:"monthFinishRate"`
 	AdvConfirmTime   *string       `json:"advConfirmTime"`
 	Email            *string       `json:"email"`
 	RegistrationTime *string       `json:"registrationTime"`
@@ -118,6 +118,6 @@ type Advertiser struct {
 	TagIconUrls      []interface{} `json:"tagIconUrls"`
 	UserGrade        int32         `json:"userGrade"`
 	UserIdentity     *string       `json:"userIdentity"`
-	ProMerchant      *string       `json:"proMerchant"`
+	ProMerchant      *bool         `json:"proMerchant"`
 	IsBlocked        *string       `json:"isBlocked"`
 }
