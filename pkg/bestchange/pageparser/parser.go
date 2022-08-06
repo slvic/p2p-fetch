@@ -1,4 +1,4 @@
-package bestchange
+package pageparser
 
 import (
 	"fmt"
@@ -19,15 +19,15 @@ const (
 	tableBodyTag      = `tbody`
 )
 
-type Bestchange struct {
+type BestchangePageParser struct {
 	config configs.Bestchange
 }
 
-func New(cfg configs.Bestchange) *Bestchange {
-	return &Bestchange{config: cfg}
+func NewBestchangeParser(cfg configs.Bestchange) *BestchangePageParser {
+	return &BestchangePageParser{config: cfg}
 }
 
-func (b Bestchange) GetAssets() ([]models.ExchangePair, error) {
+func (b BestchangePageParser) GetAssets() ([]models.ExchangePair, error) {
 	var exchangePairs []models.ExchangePair
 
 	rawPage, err := b.getRawPage()
@@ -65,7 +65,7 @@ func (b Bestchange) GetAssets() ([]models.ExchangePair, error) {
 	return exchangePairs, nil
 }
 
-func (b Bestchange) GetExchangers(exchanges []models.ExchangePair) error {
+func (b BestchangePageParser) GetExchangers(exchanges []models.ExchangePair) error {
 	for _, exchange := range exchanges {
 		err := b.getExchangersByPair(exchange)
 		if err != nil {
@@ -82,7 +82,7 @@ func (b Bestchange) GetExchangers(exchanges []models.ExchangePair) error {
 	return nil
 }
 
-func (b Bestchange) getExchangersByPair(exchange models.ExchangePair) error {
+func (b BestchangePageParser) getExchangersByPair(exchange models.ExchangePair) error {
 	var bestchangeTable []models.BestchangeRow
 
 	rawExchangers, err := b.getRawExchangers(exchange)
@@ -114,7 +114,7 @@ func (b Bestchange) getExchangersByPair(exchange models.ExchangePair) error {
 	return nil
 }
 
-func (b Bestchange) getRawExchangers(exchange models.ExchangePair) (*html.Node, error) {
+func (b BestchangePageParser) getRawExchangers(exchange models.ExchangePair) (*html.Node, error) {
 	url := fmt.Sprintf(b.config.BaseUrl+endpointTemplate, exchange.Give, exchange.Get)
 	response, err := http.Get(url)
 	if err != nil {
@@ -141,7 +141,7 @@ func (b Bestchange) getRawExchangers(exchange models.ExchangePair) (*html.Node, 
 	return document, nil
 }
 
-func (b Bestchange) getRawPage() (*html.Node, error) {
+func (b BestchangePageParser) getRawPage() (*html.Node, error) {
 	response, err := http.Get(b.config.BaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("could not get responce: %s", err)

@@ -1,4 +1,4 @@
-package bestchange
+package pageparser
 
 import (
 	"bytes"

@@ -82,4 +82,5 @@ binance {
 
 bestchange {
   baseurl = "https://www.bestchange.com/"
+  apiurl = "http://api.bestchange.ru/info.zip"
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/slvic/p2p-fetch/internal/configs"
-	"github.com/slvic/p2p-fetch/pkg/bestchange"
+	"github.com/slvic/p2p-fetch/pkg/bestchange/api"
 	"github.com/slvic/p2p-fetch/pkg/markets/binance"
 	"log"
 	"net/http"
@@ -17,7 +17,7 @@ const (
 )
 
 type App struct {
-	bestChange *bestchange.Bestchange
+	bestchange *api.Bestchange
 	binance    *binance.Binance
 	config     configs.App
 }
@@ -28,11 +28,11 @@ func Initialize(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("could not get config: %s", err.Error())
 	}
 
-	bestchangeParser := bestchange.New(config.Bestchange)
+	bestchangeApi := api.NewBestchangeParser(config.Bestchange)
 	binanceApi := binance.New(config.Binance)
 
 	return &App{
-		bestChange: bestchangeParser,
+		bestchange: bestchangeApi,
 		binance:    binanceApi,
 		config:     config.App,
 	}, nil
@@ -74,16 +74,7 @@ func startMetricsGatherer() error {
 
 func (a *App) gatherData() {
 	go func() {
-		assets, err := a.bestChange.GetAssets()
-		if err != nil {
-			log.Printf("could not get assets: %s", err.Error())
-			return
-		}
-		err = a.bestChange.GetExchangers(assets)
-		if err != nil {
-			log.Printf("could not get exchangers: %s", err.Error())
-			return
-		}
+		a.bestchange.GetData()
 	}()
 
 	go func() {

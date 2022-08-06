@@ -23,6 +23,7 @@ type Binance struct {
 
 type Bestchange struct {
 	BaseUrl string `hcl:"baseurl"`
+	ApiUrl  string `hcl:"apiurl"`
 }
 
 func GetConfig(fileName string) (AppConfig, error) {
