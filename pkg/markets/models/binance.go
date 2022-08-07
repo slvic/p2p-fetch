@@ -5,7 +5,7 @@ type BinanceRequest struct {
 	Fiat          string   `json:"fiat"`
 	MerchantCheck bool     `json:"merchantCheck"`
 	Page          int32    `json:"page"`
-	PayTypes      []string `json:"payTypes"`
+	PayTypes      []string `json:"-"`
 	PublisherType *string  `json:"publisherType"`
 	Rows          int32    `json:"rows"`
 	TradeType     string   `json:"tradeType"`
@@ -21,9 +21,6 @@ type BinanceResponse struct {
 type Data struct {
 	Adv        Adv        `json:"adv"`
 	Advertiser Advertiser `json:"advertiser"`
-}
-
-type name struct {
 }
 
 type Adv struct {

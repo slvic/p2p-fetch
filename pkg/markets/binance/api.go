@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type Binance struct {
@@ -25,7 +29,6 @@ func getOptions(asset, fiat string) models.BinanceRequest {
 		Fiat:          fiat,
 		MerchantCheck: true,
 		Page:          1,
-		PayTypes:      []string{"BANK"},
 		PublisherType: nil,
 		Rows:          20,
 		TradeType:     "SELL",
@@ -42,6 +45,7 @@ func (b *Binance) GetAllData() {
 			}
 		}
 	}
+	log.Printf("binance api data is successfully gathered: %v", time.Now())
 }
 
 func (b *Binance) getData(options *models.BinanceRequest) error {
@@ -55,6 +59,19 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 	err = json.Unmarshal(response, &binanceResponse)
 	if err != nil {
 		return fmt.Errorf("could not unmarshal responce body: %s", err.Error())
+	}
+
+	for _, data := range binanceResponse.Data {
+		{ //price
+			price, err := strconv.ParseFloat(*data.Adv.Price, 64)
+			if err != nil {
+				return fmt.Errorf("could not parse the price")
+			}
+			promauto.NewSummary(prometheus.SummaryOpts{
+				Namespace: "binance",
+				Name:      fmt.Sprintf("price_%s_%s_to_%s_adv_no_%s", *data.Adv.TradeMethods[0].Identifier, *data.Adv.Asset, *data.Adv.FiatUnit, *data.Adv.AdvNo),
+			}).Observe(price)
+		}
 	}
 
 	return nil

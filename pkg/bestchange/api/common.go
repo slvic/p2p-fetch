@@ -5,6 +5,8 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/slvic/p2p-fetch/pkg/bestchange/models"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 	"io"
 	"net/http"
 	"os"
@@ -143,9 +145,9 @@ func getRawCurrencies(fileName string) (map[int]string, error) {
 		return nil, fmt.Errorf("could not open a file: %w", err)
 	}
 	defer file.Close()
+	encodedReader := transform.NewReader(file, charmap.Windows1251.NewDecoder())
 
-	scanner := bufio.NewScanner(file)
-
+	scanner := bufio.NewScanner(encodedReader)
 	for scanner.Scan() {
 		var currency models.RawCurrency
 
@@ -175,8 +177,9 @@ func getRawExchangers(fileName string) (map[int]string, error) {
 		return nil, fmt.Errorf("could not open a file: %w", err)
 	}
 	defer file.Close()
+	encodedReader := transform.NewReader(file, charmap.Windows1251.NewDecoder())
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(encodedReader)
 
 	for scanner.Scan() {
 		var exchanger models.RawExchanger

@@ -9,6 +9,7 @@ import (
 	"github.com/slvic/p2p-fetch/pkg/markets/binance"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -39,22 +40,20 @@ func Initialize(ctx context.Context) (*App, error) {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	err := startMetricsGatherer()
-	if err != nil {
-		return fmt.Errorf("could not start metrics gatherer: %w", err)
-	}
+	ctx, cancelFunc := context.WithCancel(ctx)
+	go startMetricsGatherer(cancelFunc)
 
 	log.Printf("\napp is running...\n")
 	dur := time.Duration(a.config.FetchInterval) * time.Hour
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
 
-	a.gatherData()
+	a.gatherData(ctx)
 outerLoop:
 	for {
 		select {
 		case <-ticker.C:
-			a.gatherData()
+			//a.gatherData(ctx)
 		case <-ctx.Done():
 			break outerLoop
 		}
@@ -63,21 +62,31 @@ outerLoop:
 	return nil
 }
 
-func startMetricsGatherer() error {
-	http.Handle("/metrics", promhttp.Handler())
-	err := http.ListenAndServe(":2112", nil)
+func startMetricsGatherer(cancel context.CancelFunc) {
+	r := http.NewServeMux()
+	r.Handle("/metrics", promhttp.Handler())
+	err := http.ListenAndServe(":8080", r)
 	if err != nil {
-		return err
+		log.Printf("could not start a metrics gatherer: %s", err.Error())
+		cancel()
 	}
-	return nil
 }
 
-func (a *App) gatherData() {
-	go func() {
-		a.bestchange.GetData()
-	}()
+func (a *App) gatherData(ctx context.Context) {
+	startTime := time.Now()
+	var wg sync.WaitGroup
+	wg.Add(2)
 
 	go func() {
 		a.binance.GetAllData()
+		wg.Done()
 	}()
+
+	go func() {
+		a.bestchange.GetData(ctx)
+		wg.Done()
+	}()
+
+	wg.Wait()
+	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(4*time.Hour))
 }
