@@ -53,7 +53,7 @@ outerLoop:
 	for {
 		select {
 		case <-ticker.C:
-			//a.gatherData(ctx)
+			a.gatherData(ctx)
 		case <-ctx.Done():
 			break outerLoop
 		}
