@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
 	"io/ioutil"
@@ -13,6 +12,19 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+)
+
+func init() {
+	prometheus.MustRegister(binancePrice)
+}
+
+var (
+	binancePrice = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace: "binance",
+		Name:      "price",
+	},
+		[]string{"tradeType", "asset", "fiat", "advNo"},
+	)
 )
 
 type Binance struct {
@@ -23,15 +35,26 @@ func New(cfg configs.Binance) *Binance {
 	return &Binance{config: cfg}
 }
 
-func getOptions(asset, fiat string) models.BinanceRequest {
-	return models.BinanceRequest{
-		Asset:         asset,
-		Fiat:          fiat,
-		MerchantCheck: true,
-		Page:          1,
-		PublisherType: nil,
-		Rows:          20,
-		TradeType:     "SELL",
+func getOptions(asset, fiat string) []models.BinanceRequest {
+	return []models.BinanceRequest{
+		{
+			Asset:         asset,
+			Fiat:          fiat,
+			MerchantCheck: true,
+			Page:          1,
+			PublisherType: nil,
+			Rows:          20,
+			TradeType:     "BUY",
+		},
+		{
+			Asset:         asset,
+			Fiat:          fiat,
+			MerchantCheck: true,
+			Page:          1,
+			PublisherType: nil,
+			Rows:          20,
+			TradeType:     "SELL",
+		},
 	}
 }
 
@@ -39,10 +62,13 @@ func (b *Binance) GetAllData() {
 	for _, asset := range b.config.Assets {
 		for _, fiat := range b.config.Fiats {
 			options := getOptions(asset, fiat)
-			err := b.getData(&options)
-			if err != nil {
-				log.Printf("could not get binance data: %s", err.Error())
+			for _, option := range options {
+				err := b.getData(&option)
+				if err != nil {
+					log.Printf("could not get binance data: %s", err.Error())
+				}
 			}
+
 		}
 	}
 	log.Printf("binance api data is successfully gathered: %v", time.Now())
@@ -67,10 +93,12 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 			if err != nil {
 				return fmt.Errorf("could not parse the price")
 			}
-			promauto.NewSummary(prometheus.SummaryOpts{
-				Namespace: "binance",
-				Name:      fmt.Sprintf("price_%s_%s_to_%s_adv_no_%s", *data.Adv.TradeMethods[0].Identifier, *data.Adv.Asset, *data.Adv.FiatUnit, *data.Adv.AdvNo),
-			}).Observe(price)
+			binancePrice.WithLabelValues([]string{
+				*data.Adv.TradeType,
+				*data.Adv.Asset,
+				*data.Adv.FiatUnit,
+				*data.Adv.AdvNo,
+			}...).Observe(price)
 		}
 	}
 

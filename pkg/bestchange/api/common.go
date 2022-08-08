@@ -140,6 +140,10 @@ func getExchangeRates(
 func getRawCurrencies(fileName string) (map[int]string, error) {
 	currencies := make(map[int]string)
 
+	fileName, err := filepath.Abs(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("could not get absolute file path: %w", err)
+	}
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("could not open a file: %w", err)
@@ -172,6 +176,10 @@ func getRawCurrencies(fileName string) (map[int]string, error) {
 func getRawExchangers(fileName string) (map[int]string, error) {
 	exchangers := make(map[int]string)
 
+	fileName, err := filepath.Abs(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("could not get absolute file path: %w", err)
+	}
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("could not open a file: %w", err)
@@ -205,6 +213,10 @@ func getRawExchangers(fileName string) (map[int]string, error) {
 func getRawExchangeRates(fileName string) ([]models.RawExchangeRate, error) {
 	var exchangeRates []models.RawExchangeRate
 
+	fileName, err := filepath.Abs(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("could not get absolute file path: %w", err)
+	}
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("could not open a file: %w", err)

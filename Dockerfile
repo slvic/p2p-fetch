@@ -6,6 +6,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o fetcher
+RUN go build -o fetcher ./cmd
 
 ENTRYPOINT ["/app/fetcher"]
