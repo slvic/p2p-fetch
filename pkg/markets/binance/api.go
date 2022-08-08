@@ -2,11 +2,13 @@ package binance
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
+	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -58,18 +60,26 @@ func getOptions(asset, fiat string) []models.BinanceRequest {
 	}
 }
 
-func (b *Binance) GetAllData() {
+func (b *Binance) GetAllData(ctx context.Context) {
+	binanceRequest, ctx := errgroup.WithContext(ctx)
 	for _, asset := range b.config.Assets {
 		for _, fiat := range b.config.Fiats {
 			options := getOptions(asset, fiat)
 			for _, option := range options {
-				err := b.getData(&option)
-				if err != nil {
-					log.Printf("could not get binance data: %s", err.Error())
-				}
+				binanceRequest.Go(func() error {
+					err := b.getData(&option)
+					if err != nil {
+						log.Printf("could not get binance data: %s", err.Error())
+					}
+					return nil
+				})
 			}
 
 		}
+	}
+	if err := binanceRequest.Wait(); err != nil {
+		log.Printf("binance api data gathered with errors: %s", err.Error())
+		return
 	}
 	log.Printf("binance api data is successfully gathered: %v", time.Now())
 }

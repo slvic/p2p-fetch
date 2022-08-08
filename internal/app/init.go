@@ -83,7 +83,7 @@ func (a *App) gatherData(ctx context.Context) {
 	}()
 
 	go func() {
-		a.binance.GetAllData()
+		a.binance.GetAllData(ctx)
 		wg.Done()
 	}()
 
