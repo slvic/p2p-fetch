@@ -14,13 +14,20 @@ import (
 )
 
 func init() {
-	prometheus.MustRegister(bestchageRate)
+	prometheus.MustRegister(bestchageGiveRate)
+	prometheus.MustRegister(bestchageGetRate)
 }
 
 var (
-	bestchageRate = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+	bestchageGiveRate = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace: "bestchange",
-		Name:      "exchangeRate",
+		Name:      "exchangeGiveRate",
+	},
+		[]string{"exchanger", "source", "target"},
+	)
+	bestchageGetRate = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace: "bestchange",
+		Name:      "exchangeGetRate",
 	},
 		[]string{"exchanger", "source", "target"},
 	)
@@ -86,15 +93,20 @@ func (b Bestchange) GetData(ctx context.Context) {
 	exchangeRates := getExchangeRates(<-rawExchangeRates, <-rawExchangers, <-rawCurrencies)
 
 	replacer := strings.NewReplacer(" ", "_", "-", "_", "(", "", ")", "", "/", "", ".", "")
-	index := 0
 	for _, exchangeRate := range exchangeRates {
-		index += 1
-		{ //get rate
-			bestchageRate.WithLabelValues([]string{
+		{ //give rate
+			bestchageGiveRate.WithLabelValues([]string{
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.ExchangerName)),
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.SourceCurrency)),
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.TargetCurrency)),
 			}...).Observe(exchangeRate.GiveRate)
+		}
+		{ //get rate
+			bestchageGetRate.WithLabelValues([]string{
+				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.ExchangerName)),
+				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.SourceCurrency)),
+				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.TargetCurrency)),
+			}...).Observe(exchangeRate.GetRate)
 		}
 	}
 	log.Printf("bestchange api data is successfully gathered: %v", time.Now())

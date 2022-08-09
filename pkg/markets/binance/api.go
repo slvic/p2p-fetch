@@ -62,8 +62,8 @@ func getOptions(asset, fiat string) []models.BinanceRequest {
 
 func (b *Binance) GetAllData(ctx context.Context) {
 	binanceRequest, ctx := errgroup.WithContext(ctx)
-	for _, asset := range b.config.Assets {
-		for _, fiat := range b.config.Fiats {
+	for _, fiat := range b.config.Fiats {
+		for _, asset := range b.config.Assets {
 			options := getOptions(asset, fiat)
 			for _, option := range options {
 				binanceRequest.Go(func() error {
