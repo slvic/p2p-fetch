@@ -58,10 +58,10 @@ func (a *App) Run(ctx context.Context) error {
 		case <-oomTicker.C:
 			runtime.ReadMemStats(&m)
 			// For info on each, see: https://golang.org/pkg/runtime/#MemStats
-			fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
-			fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
-			fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
-			fmt.Printf("\tNumGC = %v\n", m.NumGC)
+			log.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+			log.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+			log.Printf("\tSys = %v MiB", bToMb(m.Sys))
+			log.Printf("\tNumGC = %v\n", m.NumGC)
 		case <-ctx.Done():
 			return
 		}
