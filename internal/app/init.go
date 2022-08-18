@@ -9,6 +9,7 @@ import (
 	"github.com/slvic/p2p-fetch/pkg/markets/binance"
 	"log"
 	"net/http"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -48,6 +49,24 @@ func (a *App) Run(ctx context.Context) error {
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
 
+	oomTicker := time.NewTicker(time.Second)
+	defer oomTicker.Stop()
+
+	go func(ctx context.Context) {
+		var m runtime.MemStats
+		select {
+		case <-oomTicker.C:
+			runtime.ReadMemStats(&m)
+			// For info on each, see: https://golang.org/pkg/runtime/#MemStats
+			fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+			fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+			fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
+			fmt.Printf("\tNumGC = %v\n", m.NumGC)
+		case <-ctx.Done():
+			return
+		}
+	}(ctx)
+
 	a.gatherData(ctx)
 outerLoop:
 	for {
@@ -60,6 +79,10 @@ outerLoop:
 	}
 
 	return nil
+}
+
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
 }
 
 func startMetricsGatherer(cancel context.CancelFunc) {
