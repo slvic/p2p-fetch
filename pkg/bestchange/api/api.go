@@ -42,6 +42,7 @@ func NewBestchangeParser(cfg configs.Bestchange) *Bestchange {
 }
 
 func (b Bestchange) GetData(ctx context.Context) {
+	log.Printf("bestchange api data gathering started")
 	err := getBcApiFile(b.config.ApiUrl)
 	if err != nil {
 		log.Printf("could not get bestchange api file: %s", err.Error())

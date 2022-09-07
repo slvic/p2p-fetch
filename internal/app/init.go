@@ -81,6 +81,7 @@ func startMetricsGatherer(cancel context.CancelFunc) {
 }
 
 func (a *App) gatherData(ctx context.Context) {
+	log.Printf("data gathering started")
 	startTime := time.Now()
 	var wg sync.WaitGroup
 	wg.Add(2)
