@@ -49,31 +49,33 @@ func (a *App) Run(ctx context.Context) error {
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
 
-	oomTicker := time.NewTicker(time.Second)
-	defer oomTicker.Stop()
-
 	go func(ctx context.Context) {
-		var m runtime.MemStats
-		select {
-		case <-oomTicker.C:
-			runtime.ReadMemStats(&m)
-			// For info on each, see: https://golang.org/pkg/runtime/#MemStats
-			log.Printf("Alloc = %v MiB", bToMb(m.Alloc))
-			log.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
-			log.Printf("\tSys = %v MiB", bToMb(m.Sys))
-			log.Printf("\tNumGC = %v\n", m.NumGC)
-		case <-ctx.Done():
-			return
+		for {
+			var m runtime.MemStats
+			select {
+			case <-ticker.C:
+				runtime.ReadMemStats(&m)
+				// For info on each, see: https://golang.org/pkg/runtime/#MemStats
+				log.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+				log.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+				log.Printf("\tSys = %v MiB", bToMb(m.Sys))
+				log.Printf("\tNumGC = %v\n", m.NumGC)
+			case <-ctx.Done():
+				return
+			}
 		}
 	}(ctx)
 
+	printMemStats()
 	a.gatherData(ctx)
 outerLoop:
 	for {
 		select {
 		case <-ticker.C:
+			printMemStats()
 			a.gatherData(ctx)
 		case <-ctx.Done():
+			printMemStats()
 			break outerLoop
 		}
 	}
@@ -112,4 +114,14 @@ func (a *App) gatherData(ctx context.Context) {
 
 	wg.Wait()
 	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(4*time.Hour))
+}
+
+func printMemStats() {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
+	log.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+	log.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+	log.Printf("\tSys = %v MiB", bToMb(m.Sys))
+	log.Printf("\tNumGC = %v\n", m.NumGC)
 }

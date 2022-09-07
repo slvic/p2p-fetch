@@ -115,6 +115,11 @@ type Advertiser struct {
 	TagIconUrls      []interface{} `json:"tagIconUrls"`
 	UserGrade        int32         `json:"userGrade"`
 	UserIdentity     *string       `json:"userIdentity"`
-	ProMerchant      *bool         `json:"proMerchant"`
+	ProMerchant      *ProMerchant  `json:"proMerchant"`
 	IsBlocked        *string       `json:"isBlocked"`
+}
+
+type ProMerchant struct {
+	MerchantLogo        *string `json:"merchantLogo"`
+	MerchantDescription *string `json:"merchantDescription"`
 }
