@@ -18,6 +18,8 @@ import (
 
 func init() {
 	prometheus.MustRegister(binancePrice)
+	prometheus.MustRegister(binanceTradableQuantity)
+	prometheus.MustRegister(binanceCommissionRate)
 }
 
 var (
