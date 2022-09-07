@@ -45,26 +45,9 @@ func (a *App) Run(ctx context.Context) error {
 	go startMetricsGatherer(cancelFunc)
 
 	log.Printf("\napp is running...\n")
-	dur := time.Duration(a.config.FetchInterval) * time.Hour
+	dur := time.Duration(a.config.FetchInterval) * time.Minute
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
-
-	go func(ctx context.Context) {
-		for {
-			var m runtime.MemStats
-			select {
-			case <-ticker.C:
-				runtime.ReadMemStats(&m)
-				// For info on each, see: https://golang.org/pkg/runtime/#MemStats
-				log.Printf("Alloc = %v MiB", bToMb(m.Alloc))
-				log.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
-				log.Printf("\tSys = %v MiB", bToMb(m.Sys))
-				log.Printf("\tNumGC = %v\n", m.NumGC)
-			case <-ctx.Done():
-				return
-			}
-		}
-	}(ctx)
 
 	printMemStats()
 	a.gatherData(ctx)
