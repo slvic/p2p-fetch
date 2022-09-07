@@ -45,8 +45,7 @@ func (a *App) Run(ctx context.Context) error {
 	go startMetricsGatherer(cancelFunc)
 
 	log.Printf("\napp is running...\n")
-	dur := time.Duration(a.config.FetchInterval) * time.Minute
-	ticker := time.NewTicker(dur)
+	ticker := time.NewTicker(time.Duration(a.config.FetchInterval) * time.Minute)
 	defer ticker.Stop()
 
 	printMemStats()
@@ -97,7 +96,7 @@ func (a *App) gatherData(ctx context.Context) {
 	}()
 
 	wg.Wait()
-	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(4*time.Hour))
+	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(time.Duration(a.config.FetchInterval)*time.Minute))
 }
 
 func printMemStats() {

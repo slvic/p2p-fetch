@@ -9,7 +9,7 @@ import (
 	"github.com/slvic/p2p-fetch/internal/configs"
 	"github.com/slvic/p2p-fetch/pkg/markets/models"
 	"golang.org/x/sync/errgroup"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,11 +21,33 @@ func init() {
 }
 
 var (
-	binancePrice = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+	binancePriceSummaryOpts = prometheus.SummaryOpts{
 		Namespace: "binance",
 		Name:      "price",
-	},
-		[]string{"tradeType", "asset", "fiat", "advNo"},
+	}
+	binanceTradableQuantitySummaryOpts = prometheus.SummaryOpts{
+		Namespace: "binance",
+		Name:      "tradableQuantity",
+	}
+	binanceCommissionRateSummaryOpts = prometheus.SummaryOpts{
+		Namespace: "binance",
+		Name:      "commissionRate",
+	}
+	binanceLabels = []string{"tradeType", "asset", "fiat", "advNo"}
+)
+
+var (
+	binancePrice = prometheus.NewSummaryVec(
+		binancePriceSummaryOpts,
+		binanceLabels,
+	)
+	binanceTradableQuantity = prometheus.NewSummaryVec(
+		binanceTradableQuantitySummaryOpts,
+		binanceLabels,
+	)
+	binanceCommissionRate = prometheus.NewSummaryVec(
+		binanceCommissionRateSummaryOpts,
+		binanceLabels,
 	)
 )
 
@@ -104,12 +126,39 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 			if err != nil {
 				return fmt.Errorf("could not parse the price")
 			}
+			binancePrice.Reset()
 			binancePrice.WithLabelValues([]string{
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
 				*data.Adv.FiatUnit,
 				*data.Adv.AdvNo,
 			}...).Observe(price)
+		}
+		{ //tradableQuantity
+			tradableQuantity, err := strconv.ParseFloat(*data.Adv.TradableQuantity, 64)
+			if err != nil {
+				return fmt.Errorf("could not parse the price")
+			}
+			binanceTradableQuantity.Reset()
+			binanceTradableQuantity.WithLabelValues([]string{
+				*data.Adv.TradeType,
+				*data.Adv.Asset,
+				*data.Adv.FiatUnit,
+				*data.Adv.AdvNo,
+			}...).Observe(tradableQuantity)
+		}
+		{ //commissionRate
+			commissionRate, err := strconv.ParseFloat(*data.Adv.CommissionRate, 64)
+			if err != nil {
+				return fmt.Errorf("could not parse the price")
+			}
+			binanceCommissionRate.Reset()
+			binanceCommissionRate.WithLabelValues([]string{
+				*data.Adv.TradeType,
+				*data.Adv.Asset,
+				*data.Adv.FiatUnit,
+				*data.Adv.AdvNo,
+			}...).Observe(commissionRate)
 		}
 	}
 
@@ -128,7 +177,7 @@ func (b Binance) sendRequest(options *models.BinanceRequest) ([]byte, error) {
 		return nil, fmt.Errorf("could not send a request: %s", err.Error())
 	}
 
-	responseBodyBytes, err := ioutil.ReadAll(response.Body)
+	responseBodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not read a responce body: %s", err.Error())
 	}
