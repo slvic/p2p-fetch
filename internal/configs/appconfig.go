@@ -12,7 +12,7 @@ type AppConfig struct {
 }
 
 type App struct {
-	FetchInterval int64 `hcl:"fetchInterval"`
+	FetchIntervalInHours int64 `hcl:"fetchIntervalInHours"`
 }
 
 type Binance struct {

@@ -1,5 +1,5 @@
 app {
-  fetchInterval = 4
+  fetchIntervalInHours = 4
 }
 
 binance {

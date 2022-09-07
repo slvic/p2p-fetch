@@ -9,6 +9,7 @@ import (
 	"github.com/slvic/p2p-fetch/pkg/markets/binance"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -16,7 +17,15 @@ import (
 
 const (
 	defaultConfigPath = "configs/config.hcl"
+	currentLocation   = "Europe/Moscow"
 )
+
+func init() {
+	err := os.Setenv("TZ", currentLocation)
+	if err != nil {
+		log.Fatal("could not set TZ env variable")
+	}
+}
 
 type App struct {
 	bestchange *api.Bestchange
@@ -45,7 +54,7 @@ func (a *App) Run(ctx context.Context) error {
 	go startMetricsGatherer(cancelFunc)
 
 	log.Printf("\napp is running...\n")
-	ticker := time.NewTicker(time.Duration(a.config.FetchInterval) * time.Minute)
+	ticker := time.NewTicker(time.Duration(a.config.FetchIntervalInHours) * time.Hour)
 	defer ticker.Stop()
 
 	printMemStats()
@@ -96,7 +105,7 @@ func (a *App) gatherData(ctx context.Context) {
 	}()
 
 	wg.Wait()
-	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(time.Duration(a.config.FetchInterval)*time.Minute))
+	log.Printf("all data is successfully fetched, next fetch will start in %s", startTime.Add(time.Duration(a.config.FetchIntervalInHours)*time.Hour))
 }
 
 func printMemStats() {
