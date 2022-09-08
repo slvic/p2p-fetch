@@ -86,6 +86,11 @@ func getOptions(asset, fiat string) []models.BinanceRequest {
 
 func (b *Binance) GetAllData(ctx context.Context) {
 	log.Printf("binance data gathering started")
+
+	binancePrice.Reset()
+	binanceTradableQuantity.Reset()
+	binanceCommissionRate.Reset()
+
 	binanceRequest, ctx := errgroup.WithContext(ctx)
 	for _, fiat := range b.config.Fiats {
 		for _, asset := range b.config.Assets {
@@ -128,7 +133,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 			if err != nil {
 				return fmt.Errorf("could not parse the price")
 			}
-			binancePrice.Reset()
 			binancePrice.WithLabelValues([]string{
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
@@ -141,7 +145,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 			if err != nil {
 				return fmt.Errorf("could not parse the price")
 			}
-			binanceTradableQuantity.Reset()
 			binanceTradableQuantity.WithLabelValues([]string{
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
@@ -154,7 +157,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 			if err != nil {
 				return fmt.Errorf("could not parse the price")
 			}
-			binanceCommissionRate.Reset()
 			binanceCommissionRate.WithLabelValues([]string{
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
