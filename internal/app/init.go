@@ -95,7 +95,7 @@ func (a *App) gatherData(ctx context.Context) {
 	wg.Add(2)
 
 	go func() {
-		a.bestchange.GetData(ctx)
+		a.bestchange.GetAllData(ctx)
 		wg.Done()
 	}()
 
