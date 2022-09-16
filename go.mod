@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/hashicorp/hcl/v2 v2.13.0
-	github.com/prometheus/client_golang v1.12.2
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 )
 
@@ -15,9 +14,11 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mehanizm/iuliia-go v1.0.2 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
+	github.com/prometheus/client_golang v1.12.2 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
