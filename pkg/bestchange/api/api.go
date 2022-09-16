@@ -53,9 +53,6 @@ func NewBestchangeParser(cfg configs.Bestchange) *Bestchange {
 func (b Bestchange) GetAllData(ctx context.Context) {
 	log.Printf("bestchange api data gathering started")
 
-	bestchageGiveRate.Reset()
-	bestchageGetRate.Reset()
-
 	b.getData(ctx)
 }
 
