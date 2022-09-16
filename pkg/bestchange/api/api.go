@@ -52,6 +52,10 @@ func NewBestchangeParser(cfg configs.Bestchange) *Bestchange {
 
 func (b Bestchange) GetData(ctx context.Context) {
 	log.Printf("bestchange api data gathering started")
+
+	bestchageGetRate.Reset()
+	bestchageGiveRate.Reset()
+
 	err := getBcApiFile(b.config.ApiUrl)
 	if err != nil {
 		log.Printf("could not get bestchange api file: %s", err.Error())
@@ -105,7 +109,6 @@ func (b Bestchange) GetData(ctx context.Context) {
 	replacer := strings.NewReplacer(" ", "_", "-", "_", "(", "", ")", "", "/", "", ".", "")
 	for _, exchangeRate := range exchangeRates {
 		{ //give rate
-			bestchageGiveRate.Reset()
 			bestchageGiveRate.WithLabelValues([]string{
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.ExchangerName)),
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.SourceCurrency)),
@@ -113,7 +116,6 @@ func (b Bestchange) GetData(ctx context.Context) {
 			}...).Observe(exchangeRate.GiveRate)
 		}
 		{ //get rate
-			bestchageGetRate.Reset()
 			bestchageGetRate.WithLabelValues([]string{
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.ExchangerName)),
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.SourceCurrency)),
