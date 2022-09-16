@@ -113,7 +113,7 @@ func (b Bestchange) GetData(ctx context.Context) {
 			}...).Observe(exchangeRate.GiveRate)
 		}
 		{ //get rate
-			bestchageGiveRate.Reset()
+			bestchageGetRate.Reset()
 			bestchageGetRate.WithLabelValues([]string{
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.ExchangerName)),
 				replacer.Replace(iuliia.Wikipedia.Translate(exchangeRate.SourceCurrency)),
