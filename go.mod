@@ -1,4 +1,4 @@
-module github.com/slvic/p2p-fetch
+module github.com/slvic/stock-observer
 
 go 1.18
 

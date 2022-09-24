@@ -2,7 +2,7 @@ package pageparser
 
 import (
 	"fmt"
-	"github.com/slvic/p2p-fetch/pkg/bestchange/models"
+	"github.com/slvic/stock-observer/pkg/bestchange/models"
 	"golang.org/x/net/html"
 	"io"
 	"strings"

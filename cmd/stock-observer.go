@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/slvic/p2p-fetch/internal/app"
+	"github.com/slvic/stock-observer/internal/app"
 	"os"
 	"os/signal"
 	"syscall"

@@ -1,4 +1,8 @@
-# BINANCE P2P-FETCHER
+# STOCK OBSERVER
+
+it fetches info from binance p2p and Bestchange
+
+simple as
 
 ### technologies:
 - grafana

@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
-	"github.com/slvic/p2p-fetch/pkg/bestchange/models"
+	"github.com/slvic/stock-observer/pkg/bestchange/models"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 	"io"
