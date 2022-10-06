@@ -35,7 +35,7 @@ var (
 		Namespace: "binance",
 		Name:      "commissionRate",
 	}
-	binanceLabels = []string{"tradeType", "asset", "fiat", "advNo"}
+	binanceLabels = []string{"tradeType", "asset", "fiat"}
 )
 
 var (
@@ -133,7 +133,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
 				*data.Adv.FiatUnit,
-				*data.Adv.AdvNo,
 			}...).Observe(price)
 		}
 		{ //tradableQuantity
@@ -145,7 +144,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
 				*data.Adv.FiatUnit,
-				*data.Adv.AdvNo,
 			}...).Observe(tradableQuantity)
 		}
 		{ //commissionRate
@@ -157,7 +155,6 @@ func (b *Binance) getData(options *models.BinanceRequest) error {
 				*data.Adv.TradeType,
 				*data.Adv.Asset,
 				*data.Adv.FiatUnit,
-				*data.Adv.AdvNo,
 			}...).Observe(commissionRate)
 		}
 	}
