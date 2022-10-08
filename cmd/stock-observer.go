@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/slvic/stock-observer/internal/app"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/slvic/stock-observer/internal/app"
 )
 
 func run(ctx context.Context) error {
@@ -22,7 +23,7 @@ func run(ctx context.Context) error {
 }
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 	if err := run(ctx); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "app run: %s\n", err.Error())

@@ -3,14 +3,15 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/mehanizm/iuliia-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/slvic/stock-observer/internal/configs"
 	"github.com/slvic/stock-observer/pkg/bestchange/models"
 	"golang.org/x/sync/errgroup"
-	"log"
-	"strings"
-	"time"
 )
 
 func init() {

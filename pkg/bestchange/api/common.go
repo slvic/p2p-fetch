@@ -4,15 +4,16 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
-	"github.com/slvic/stock-observer/pkg/bestchange/models"
-	"golang.org/x/text/encoding/charmap"
-	"golang.org/x/text/transform"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/slvic/stock-observer/pkg/bestchange/models"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 const (

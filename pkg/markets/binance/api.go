@@ -5,15 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/slvic/stock-observer/internal/configs"
-	"github.com/slvic/stock-observer/pkg/markets/models"
-	"golang.org/x/sync/errgroup"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/slvic/stock-observer/internal/configs"
+	"github.com/slvic/stock-observer/pkg/markets/models"
+	"golang.org/x/sync/errgroup"
 )
 
 func init() {

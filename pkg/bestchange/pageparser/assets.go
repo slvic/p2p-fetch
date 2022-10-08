@@ -2,10 +2,11 @@ package pageparser
 
 import (
 	"fmt"
-	"github.com/slvic/stock-observer/pkg/bestchange/models"
-	"golang.org/x/net/html"
 	"io"
 	"strings"
+
+	"github.com/slvic/stock-observer/pkg/bestchange/models"
+	"golang.org/x/net/html"
 )
 
 const (

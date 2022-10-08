@@ -3,16 +3,17 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/slvic/stock-observer/internal/configs"
-	"github.com/slvic/stock-observer/pkg/bestchange/api"
-	"github.com/slvic/stock-observer/pkg/markets/binance"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/slvic/stock-observer/internal/configs"
+	"github.com/slvic/stock-observer/pkg/bestchange/api"
+	"github.com/slvic/stock-observer/pkg/markets/binance"
 )
 
 const (

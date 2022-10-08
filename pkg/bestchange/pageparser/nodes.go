@@ -3,8 +3,9 @@ package pageparser
 import (
 	"bytes"
 	"errors"
-	"golang.org/x/net/html"
 	"io"
+
+	"golang.org/x/net/html"
 )
 
 func GetNodeByAttrKey(doc *html.Node, attrKey, attrVal string) (*html.Node, error) {
