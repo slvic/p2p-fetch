@@ -55,11 +55,15 @@ var (
 )
 
 type Binance struct {
-	config configs.Binance
+	config     configs.Binance
+	httpClient http.Client
 }
 
 func New(cfg configs.Binance) *Binance {
-	return &Binance{config: cfg}
+	return &Binance{
+		config:     cfg,
+		httpClient: http.Client{Timeout: 15 * time.Second},
+	}
 }
 
 func getOptions(asset, fiat string) []models.BinanceRequest {
@@ -170,7 +174,7 @@ func (b Binance) sendRequest(options *models.BinanceRequest) ([]byte, error) {
 	}
 	bodyReader := bytes.NewReader(bodyBytes)
 
-	response, err := http.Post(b.config.Address, "application/json", bodyReader)
+	response, err := b.httpClient.Post(b.config.Address, "application/json", bodyReader)
 	if err != nil {
 		return nil, fmt.Errorf("could not send a request: %s", err.Error())
 	}

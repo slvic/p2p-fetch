@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -44,17 +45,21 @@ var (
 )
 
 type Bestchange struct {
-	config configs.Bestchange
+	config     configs.Bestchange
+	httpClient http.Client
 }
 
 func NewBestchangeParser(cfg configs.Bestchange) *Bestchange {
-	return &Bestchange{cfg}
+	return &Bestchange{
+		config:     cfg,
+		httpClient: http.Client{Timeout: 15 * time.Second},
+	}
 }
 
 func (b Bestchange) GetData(ctx context.Context) {
 	log.Printf("bestchange api data gathering started")
 
-	err := getBcApiFile(b.config.ApiUrl)
+	err := b.getBcApiFile()
 	if err != nil {
 		log.Printf("could not get bestchange api file: %s", err.Error())
 		return

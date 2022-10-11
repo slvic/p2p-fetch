@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/slvic/stock-observer/internal/configs"
 	"github.com/slvic/stock-observer/pkg/bestchange/models"
@@ -21,11 +22,15 @@ const (
 )
 
 type BestchangePageParser struct {
-	config configs.Bestchange
+	config     configs.Bestchange
+	httpClient http.Client
 }
 
 func NewBestchangeParser(cfg configs.Bestchange) *BestchangePageParser {
-	return &BestchangePageParser{config: cfg}
+	return &BestchangePageParser{
+		config:     cfg,
+		httpClient: http.Client{Timeout: 15 * time.Second},
+	}
 }
 
 func (b BestchangePageParser) GetAssets() ([]models.ExchangePair, error) {
@@ -117,7 +122,7 @@ func (b BestchangePageParser) getExchangersByPair(exchange models.ExchangePair) 
 
 func (b BestchangePageParser) getRawExchangers(exchange models.ExchangePair) (*html.Node, error) {
 	url := fmt.Sprintf(b.config.BaseUrl+endpointTemplate, exchange.Give, exchange.Get)
-	response, err := http.Get(url)
+	response, err := b.httpClient.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("could not get responce: %s", err.Error())
 	}
@@ -143,7 +148,7 @@ func (b BestchangePageParser) getRawExchangers(exchange models.ExchangePair) (*h
 }
 
 func (b BestchangePageParser) getRawPage() (*html.Node, error) {
-	response, err := http.Get(b.config.BaseUrl)
+	response, err := b.httpClient.Get(b.config.BaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("could not get responce: %s", err)
 	}

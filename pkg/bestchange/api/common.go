@@ -29,8 +29,9 @@ const (
 	dataSeparator = `;`
 )
 
-func getBcApiFile(url string) error {
-	resp, err := http.Get(url)
+func (b Bestchange) getBcApiFile() error {
+
+	resp, err := b.httpClient.Get(b.config.ApiUrl)
 	if err != nil {
 		return fmt.Errorf("could not get bc api file: %w", err)
 	}
